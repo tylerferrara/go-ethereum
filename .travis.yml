@@ -1,8 +1,21 @@
 language: go
 go_import_path: github.com/ethereum/go-ethereum
 sudo: false
-matrix:
+
+jobs:
   include:
+      # This builder only tests code linters on latest version of Go
+    - stage: lint
+      os: linux
+      dist: xenial
+      go: 1.12.x
+      env:
+        - lint
+      git:
+        submodules: false # avoid cloning ethereum/tests
+      script:
+        - go run build/ci.go lint
+
     - os: linux
       dist: xenial
       go: 1.10.x
@@ -39,17 +52,6 @@ matrix:
         - unset -f cd # workaround for https://github.com/travis-ci/travis-ci/issues/8703
         - go run build/ci.go install
         - go run build/ci.go test -coverage $TEST_PACKAGES
-
-    # This builder only tests code linters on latest version of Go
-    - os: linux
-      dist: xenial
-      go: 1.12.x
-      env:
-        - lint
-      git:
-        submodules: false # avoid cloning ethereum/tests
-      script:
-        - go run build/ci.go lint
 
     # This builder does the Ubuntu PPA upload
     - if: type = push
